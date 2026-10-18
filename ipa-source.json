@@ -1,0 +1,7 @@
+{
+  "name": "iOS IPA Collection",
+  "source": "https://archive.org/details/ios-ipa-collection",
+  "api": "https://archive.org/metadata/ios-ipa-collection",
+  "downloadBase": "https://archive.org/download/ios-ipa-collection/",
+  "fileExtension": ".ipa"
+}

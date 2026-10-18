@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f7f7">
+
+<title>App Store</title>
+
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon.png">
+
+<style>
+:root {
+  --blue: #007aff;
+  --background: #f7f7f7;
+  --border: #d5d5d9;
+  --text: #222;
+  --muted: #888;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+/* Navigation */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250,250,250,.97);
+  border-bottom: 1px solid #bdbdc2;
+}
+
+.nav-title {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.nav-action {
+  position: absolute;
+  right: 14px;
+  color: var(--blue);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+/* Search */
+
+.search-area {
+  padding: 9px 12px;
+  background: #efeff4;
+  border-bottom: 1px solid var(--border);
+}
+
+.search {
+  width: 100%;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid #d1d1d6;
+  border-radius: 7px;
+  background: white;
+  font-size: 16px;
+  outline: none;
+}
+
+.search:focus {
+  border-color: #83baff;
+}
+
+/* Version filter */
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 15px;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.filter-label {
+  color: #666;
+  font-size: 14px;
+}
+
+.version-select {
+  padding: 6px 9px;
+  color: var(--blue);
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Page content */
+
+main {
+  max-width: 760px;
+  margin: auto;
+  padding-bottom: calc(65px + env(safe-area-inset-bottom));
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.heading {
+  margin: 0;
+  padding: 22px 15px 12px;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -.5px;
+}
+
+.subheading {
+  padding: 18px 15px 9px;
+  margin: 0;
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.description {
+  padding: 0 15px 13px;
+  color: #777;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notice {
+  margin: 12px 15px;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 4px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* Featured banner */
+
+.banner {
+  padding: 25px 20px;
+  min-height: 175px;
+  color: white;
+  background: linear-gradient(125deg, #1687f8, #5ac8fa);
+}
+
+.banner-label {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.banner h1 {
+  margin: 12px 0 7px;
+  font-size: 30px;
+  font-weight: 300;
+}
+
+.banner p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* App rows */
+
+.app-list {
+  background: white;
+}
+
+.app-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 83px;
+  padding: 10px 14px;
+  position: relative;
+  background: white;
+}
+
+.app-row::after {
+  content: "";
+  height: 1px;
+  position: absolute;
+  bottom: 0;
+  left: 86px;
+  right: 0;
+  background: #e5e5e5;
+}
+
+.app-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  border-radius: 13px;
+  color: white;
+  background: linear-gradient(145deg, #60c8ff, #007aff);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.app-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-name {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.app-description {
+  margin-top: 4px;
+  color: #777;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.app-meta {
+  margin-top: 4px;
+  color: #999;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.get-button {
+  display: inline-block;
+  min-width: 58px;
+  padding: 5px 11px;
+  border: 1px solid #d5d5d5;
+  border-radius: 16px;
+  background: #f5f5f5;
+  color: var(--blue);
+  text-align: center;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.get-button:active {
+  background: #e3e3e3;
+}
+
+/* General buttons */
+
+.button {
+  padding: 10px 15px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--blue);
+  color: white;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: .5;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 15px;
+}
+
+.text-button {
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.empty {
+  padding: 35px 18px;
+  background: white;
+  color: #888;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.status {
+  padding: 10px 15px;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* iOS 7 style bottom navigation */
+
+.tabbar {
+  position: fixed;
+  z-index: 10;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  min-height: 50px;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(249,249,249,.97);
+  border-top: 1px solid #bdbdc2;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.tab {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 1px 3px;
+  border: 0;
+  background: transparent;
+  color: #929292;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.tab.active {
+  color: var(--blue);
+}
+
+.tab-icon {
+  font-size: 21px;
+  line-height: 23px;
+}
+
+.tab-label {
+  font-size: 10px;
+}
+
+footer {
+  padding: 22px 10px;
+  color: #aaa;
+  text-align: center;
+  font-size: 11px;
+}
+
+@media (min-width: 650px) {
+  body {
+    background: #ededf2;
+  }
+
+  main {
+    min-height: calc(100vh - 45px);
+    background: var(--background);
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+  }
+
+  .tabbar {
+    left: 50%;
+    right: auto;
+    width: 100%;
+    max-width: 760px;
+    transform: translateX(-50%);
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="nav-title" id="navTitle">Featured</div>
+  <button class="nav-action" id="refreshButton">Refresh</button>
+</header>
+
+<main>
+
+  <!-- FEATURED -->
+
+  <section class="page active" id="featuredPage">
+    <div class="banner">
+      <div class="banner-label">Discover</div>
+      <h1>Classic Apps</h1>
+      <p>Explore apps from the Internet Archive IPA collection.</p>
+    </div>
+
+    <div class="filter-row">
+      <span class="filter-label">Target iOS version</span>
+      <select class="version-select" id="iosVersion">
+        <option value="7">iOS 7</option>
+        <option value="8">iOS 8</option>
+        <option value="9">iOS 9</option>
+      </select>
+    </div>
+
+    <h2 class="subheading">From the Archive</h2>
+
+    <div class="description">
+      These listings are loaded from your configured Internet Archive item.
+      Compatibility is not guaranteed.
+    </div>
+
+    <div class="app-list" id="featuredApps">
+      <div class="empty">Loading archive apps…</div>
+    </div>
+  </section>
+
+  <!-- ALL APPS -->
+
+  <section class="page" id="appsPage">
+    <h1 class="heading">Apps</h1>
+
+    <div class="search-area">
+      <input
+        id="appSearch"
+        class="search"
+        type="search"
+        placeholder="Search apps..."
+        aria-label="Search IPA files"
+      >
+    </div>
+
+    <div class="filter-row">
+      <span class="filter-label">Target iOS version</span>
+      <select class="version-select" id="catalogVersion">
+        <option value="7">iOS 7</option>
+        <option value="8">iOS 8</option>
+        <option value="9">iOS 9</option>
+      </select>
+    </div>
+
+    <div class="status" id="catalogCount"></div>
+    <div class="app-list" id="appsList"></div>
+  </section>
+
+  <!-- ARCHIVE -->
+
+  <section class="page" id="archivePage">
+    <h1 class="heading">IPA Archive</h1>
+
+    <div class="description">
+      Files are retrieved directly from the Internet Archive metadata API.
+    </div>
+
+    <div class="notice">
+      iOS compatibility is unknown unless verified separately.
+      Downloading an IPA does not guarantee it can be installed.
+    </div>
+
+    <div class="toolbar">
+      <button class="button" id="loadArchiveButton">Reload Archive</button>
+      <a
+        class="text-button"
+        href="https://archive.org/details/ios-ipa-collection"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Open Internet Archive ↗</a>
+    </div>
+
+    <div class="status" id="archiveStatus"></div>
+    <div class="app-list" id="archiveResults"></div>
+  </section>
+
+  <!-- SETTINGS -->
+
+  <section class="page" id="settingsPage">
+    <h1 class="heading">Settings</h1>
+
+    <h2 class="subheading">Catalog</h2>
+
+    <div class="notice">
+      Archive source is configured in <code>ipa-source.json</code>.
+    </div>
+
+    <div class="toolbar">
+      <button class="text-button" id="exportButton">Export IPA list as JSON</button>
+      <button class="text-button" id="importButton">Import app catalog</button>
+      <input id="importFile" type="file" accept=".json,application/json" hidden>
+    </div>
+
+    <h2 class="subheading">About</h2>
+
+    <div class="notice">
+      iOS Store — light interface inspired by iOS 7.<br><br>
+      This website browses IPA downloads. It does not itself install or sign apps.
+    </div>
+  </section>
+
+  <footer>iOS Store · Archive browser</footer>
+
+</main>
+
+<nav class="tabbar" aria-label="Main navigation">
+  <button class="tab active" data-page="featured">
+    <span class="tab-icon">✦</span>
+    <span class="tab-label">Featured</span>
+  </button>
+
+  <button class="tab" data-page="apps">
+    <span class="tab-icon">▦</span>
+    <span class="tab-label">Apps</span>
+  </button>
+
+  <button class="tab" data-page="archive">
+    <span class="tab-icon">☁</span>
+    <span class="tab-label">Archive</span>
+  </button>
+
+  <button class="tab" data-page="settings">
+    <span class="tab-icon">⚙</span>
+    <span class="tab-label">Settings</span>
+  </button>
+</nav>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const SOURCE_CONFIG = "./ipa-source.json";
+
+let config = null;
+let ipaFiles = [];
+let loaded = false;
+let loading = false;
+let currentPage = "featured";
+
+/* -----------------------------
+   Navigation
+----------------------------- */
+
+const pageTitles = {
+  featured: "Featured",
+  apps: "Apps",
+  archive: "IPA Archive",
+  settings: "Settings"
+};
+
+function showPage(name) {
+  currentPage = name;
+
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.toggle("active", page.id === name + "Page");
+  });
+
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.page === name);
+  });
+
+  $("navTitle").textContent = pageTitles[name] || "App Store";
+
+  if (!loaded && !loading) {
+    loadArchive();
+  }
+
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => showPage(tab.dataset.page));
+});
+
+/* -----------------------------
+   Load source configuration
+----------------------------- */
+
+async function getConfig() {
+  if (config) return config;
+
+  const response = await fetch(SOURCE_CONFIG, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      "Cannot load ipa-source.json (HTTP " + response.status + ")."
+    );
+  }
+
+  config = await response.json();
+
+  if (!config.api || !config.fileExtension) {
+    throw new Error(
+      "ipa-source.json needs api and fileExtension fields."
+    );
+  }
+
+  return config;
+}
+
+/* -----------------------------
+   Load actual IPA files
+----------------------------- */
+
+async function loadArchive() {
+  if (loading) return;
+
+  loading = true;
+
+  $("archiveStatus").textContent = "Loading IPA collection…";
+
+  $("featuredApps").replaceChildren(
+    makeEmpty("Loading apps from the archive…")
+  );
+
+  $("appsList").replaceChildren(
+    makeEmpty("Loading apps from the archive…")
+  );
+
+  $("archiveResults").replaceChildren(
+    makeEmpty("Loading archive files…")
+  );
+
+  try {
+    const source = await getConfig();
+
+    const response = await fetch(source.api, {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        "Internet Archive returned HTTP " + response.status + "."
+      );
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    const extension = String(source.fileExtension).toLowerCase();
+
+    const base = String(
+      source.downloadBase ||
+      "https://archive.org/download/" + encodeURIComponent(
+        getIdentifier(source.source)
+      ) + "/"
+    ).replace(/\/+$/, "");
+
+    ipaFiles = (data.files || [])
+      .filter(file =>
+        typeof file.name === "string" &&
+        file.name.toLowerCase().endsWith(extension) &&
+        !file.private
+      )
+      .map(file => {
+        const encodedPath = file.name
+          .split("/")
+          .map(part => encodeURIComponent(part))
+          .join("/");
+
+        return {
+          name: file.name,
+          size: Number(file.size) || 0,
+          md5: file.md5 || "",
+          url: base + "/" + encodedPath
+        };
+      })
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, {
+          sensitivity: "base"
+        })
+      );
+
+    loaded = true;
+
+    $("archiveStatus").textContent =
+      ipaFiles.length + " IPA file(s) found in " +
+      (source.name || "the collection") + ".";
+
+    renderAll();
+  } catch (error) {
+    loaded = false;
+
+    $("archiveStatus").textContent = "Could not load the collection.";
+
+    const message =
+      error.message +
+      " Check your internet connection and ipa-source.json. " +
+      "If you opened this page as a local file, try hosting it on HTTPS.";
+
+    $("featuredApps").replaceChildren(makeEmpty(message));
+    $("appsList").replaceChildren(makeEmpty(message));
+    $("archiveResults").replaceChildren(makeEmpty(message));
+  } finally {
+    loading = false;
+  }
+}
+
+function getIdentifier(url) {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    return parts[parts.length - 1] || "ios-ipa-collection";
+  } catch {
+    return "ios-ipa-collection";
+  }
+}
+
+/* -----------------------------
+   App rows
+----------------------------- */
+
+function makeEmpty(message) {
+  const div = document.createElement("div");
+  div.className = "empty";
+  div.textContent = message;
+  return div;
+}
+
+function formatSize(bytes) {
+  if (!bytes) return "Size unknown";
+
+  const units = ["B", "KB", "MB", "GB", "TB"];
+
+  let size = bytes;
+  let unit = 0;
+
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit++;
+  }
+
+  return size.toFixed(unit === 0 ? 0 : 1) + " " + units[unit];
+}
+
+function makeAppRow(file) {
+  const row = document.createElement("article");
+  row.className = "app-row";
+
+  const icon = document.createElement("div");
+  icon.className = "app-icon";
+  icon.textContent = "IPA";
+
+  const info = document.createElement("div");
+  info.className = "app-info";
+
+  const filename = file.name.split("/").pop();
+
+  const title = document.createElement("div");
+  title.className = "app-name";
+  title.textContent = filename;
+
+  const description = document.createElement("div");
+  description.className = "app-description";
+  description.textContent = "iOS compatibility unknown";
+
+  const meta = document.createElement("div");
+  meta.className = "app-meta";
+  meta.textContent = formatSize(file.size);
+
+  info.append(title, description, meta);
+
+  const action = document.createElement("div");
+
+  const link = document.createElement("a");
+  link.className = "get-button";
+  link.textContent = "GET";
+  link.href = file.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.title = "Download " + filename;
+
+  action.appendChild(link);
+  row.append(icon, info, action);
+
+  return row;
+}
+
+/* -----------------------------
+   Render archive files everywhere
+----------------------------- */
+
+function renderFileList(container, files) {
+  container.replaceChildren();
+
+  if (!files.length) {
+    container.appendChild(
+      makeEmpty(
+        loaded
+          ? "No IPA files match your search."
+          : "Load the archive to see its apps."
+      )
+    );
+
+    return;
+  }
+
+  files.forEach(file => {
+    container.appendChild(makeAppRow(file));
+  });
+}
+
+function renderAll() {
+  const query = $("appSearch").value.trim().toLowerCase();
+
+  const matching = ipaFiles.filter(file =>
+    file.name.toLowerCase().includes(query)
+  );
+
+  $("catalogCount").textContent =
+    matching.length + " IPA file(s)";
+
+  /* Real archive files populate the Featured page. */
+  renderFileList(
+    $("featuredApps"),
+    matching.slice(0, 30)
+  );
+
+  /* All loaded archive files populate Apps. */
+  renderFileList(
+    $("appsList"),
+    matching
+  );
+
+  /* Archive page lists the same live collection. */
+  renderFileList(
+    $("archiveResults"),
+    matching
+  );
+
+  $("archiveStatus").textContent = loaded
+    ? ipaFiles.length + " IPA file(s) loaded from " +
+      (config.name || "the archive") + "."
+    : "";
+}
+
+/* -----------------------------
+   Search
+----------------------------- */
+
+$("appSearch").addEventListener("input", renderAll);
+
+/* -----------------------------
+   Reload
+----------------------------- */
+
+$("refreshButton").addEventListener("click", () => {
+  loaded = false;
+  config = null;
+  loadArchive();
+});
+
+$("loadArchiveButton").addEventListener("click", () => {
+  loaded = false;
+  config = null;
+  loadArchive();
+});
+
+/* -----------------------------
+   JSON export
+----------------------------- */
+
+$("exportButton").addEventListener("click", () => {
+  const exportData = ipaFiles.map(file => ({
+    name: file.name,
+    size: file.size,
+    url: file.url,
+    compatibility: "unknown"
+  }));
+
+  const blob = new Blob(
+    [JSON.stringify(exportData, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "ipa-collection.json";
+  link.click();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+/* -----------------------------
+   JSON catalog import
+----------------------------- */
+
+$("importButton").addEventListener("click", () => {
+  $("importFile").click();
+});
+
+$("importFile").addEventListener("change", async event => {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  try {
+    const imported = JSON.parse(await file.text());
+
+    if (!Array.isArray(imported)) {
+      throw new Error("Expected a JSON array.");
+    }
+
+    /*
+      Imported catalog entries are appended to the live archive list.
+      Entries with URLs become downloadable rows.
+    */
+    const importedFiles = imported
+      .filter(item => item && (item.url || item.download))
+      .map(item => ({
+        name: String(item.name || item.filename || "Unnamed IPA"),
+        size: Number(item.size) || 0,
+        md5: item.md5 || "",
+        url: String(item.url || item.download)
+      }));
+
+    ipaFiles = [
+      ...ipaFiles,
+      ...importedFiles
+    ];
+
+    renderAll();
+
+    alert("Imported " + importedFiles.length + " entries.");
+  } catch (error) {
+    alert("Import failed: " + error.message);
+  } finally {
+    event.target.value = "";
+  }
+});
+
+/* -----------------------------
+   Start automatically
+----------------------------- */
+
+loadArchive();
+</script>
+
+</body>
+</html>
